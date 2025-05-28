@@ -24,7 +24,7 @@ markdown==3.5.1
 pygments==2.19.1
 
 # Utilities
-tqdm==4.66.1
+tqdm==4.66.3
 pyyaml==6.0.1
 
 # Google Generative AI
