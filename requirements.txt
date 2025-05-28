@@ -1,0 +1,38 @@
+# Core Dependencies
+python-dotenv==1.0.1
+langchain==0.2.17
+tiktoken==0.7.0
+chromadb==0.4.24
+
+# Repository Management
+GitPython==3.1.40
+
+# Vector Database
+langchain-openai==0.1.25
+langchain-community==0.2.17
+langgraph==0.2.76
+
+# File Processing
+python-magic==0.4.27
+
+# Dependency Analysis
+requests==2.31.0
+
+# Report Generation
+jinja2==3.1.2
+markdown==3.5.1
+pygments==2.19.1
+
+# Utilities
+tqdm==4.66.1
+pyyaml==6.0.1
+
+# Google Generative AI
+google-generativeai==0.7.2
+
+# tree-sitter for AST-based parsing
+tree-sitter==0.23.2
+tree-sitter-python==0.23.6
+tree-sitter-javascript==0.23.1
+tree-sitter-typescript==0.23.2
+tree-sitter-languages==1.10.2
