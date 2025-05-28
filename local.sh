@@ -75,8 +75,6 @@ docker run --rm -it \
   -e GEMINI_API_KEY="$GEMINI_API_KEY" \
   -e OPENAI_API_KEY="$OPENAI_API_KEY" \
   -e INPUT_EXTRA_IGNORE_DIRS="" \
-  -v "$REPO_ABS_PATH:/github/workspace" \
-  -v "$REPORTS_ABS_PATH:/github/workspace/security-reports" \
   "$LOCAL_IMAGE_TAG"
 
 # --- Completion ---

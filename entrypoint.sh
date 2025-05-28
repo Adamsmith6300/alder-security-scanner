@@ -28,12 +28,6 @@ python -m src.main $CMD_ARGS
 
 # Check if the output directory exists
 if [ -d "$OUTPUT_DIR" ]; then
-    # Copy reports back to the workspace
-    echo "Copying reports from $OUTPUT_DIR to GitHub workspace..."
-    mkdir -p /github/workspace/$OUTPUT_DIR
-    cp -r $OUTPUT_DIR/* /github/workspace/$OUTPUT_DIR/
-    
-    echo "::set-output name=report_dir::$OUTPUT_DIR"
     echo "Security analysis complete. Reports available in $OUTPUT_DIR directory."
 else
     echo "::warning::Output directory $OUTPUT_DIR not found. Reports may not have been generated."
