@@ -9,7 +9,7 @@ GitPython==3.1.40
 
 # Vector Database
 langchain-openai==0.1.25
-langchain-community==0.2.17
+langchain-community==0.2.19
 langgraph==0.2.76
 
 # File Processing
