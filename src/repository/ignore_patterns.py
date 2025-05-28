@@ -225,5 +225,5 @@ DEFAULT_IGNORE_FILE_PATTERNS = {
     "*.spec.ts",
     "*.fixtures.ts",
     "*.test.js", "*.spec.js", "*.test.jsx", "*.spec.jsx",
-    "*.test.py", "test_*.py", "*_test.py",
+    "*.test.py", "test_*.py", "*_test.py","security_report_*"
 }
