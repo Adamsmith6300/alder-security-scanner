@@ -173,6 +173,8 @@ class CodeAnalysisTools:
             lang = "javascript"
         elif ext in ["ts", "tsx"]:
             lang = "typescript"
+        elif ext in ["java"]:
+            lang = "java"
         else:
             logger.warning(f"Could not determine specific language from file extension: '{ext}' for file {file_path}. Defaulting to 'python'.")
         logger.debug(f"Determined language: '{lang}' for file path: {file_path}")

@@ -69,13 +69,14 @@ class CostCalculator:
         return total_cost
 
 class SecurityAnalysisOrchestrator:
-    def __init__(self, api_key=None, track_cost=False, extra_ignore_dirs=None, max_cost=5.0):
+    def __init__(self, api_key=None, track_cost=False, extra_ignore_dirs=None, max_cost=5.0, verify_exploits=False):
         self.api_key = api_key or os.getenv("GEMINI_API_KEY") # Updated env var
         if not self.api_key:
             raise ValueError("API key is required. Set GEMINI_API_KEY environment variable or pass explicitly.")
         
         self.track_cost = track_cost
         self.max_cost = max_cost
+        self.verify_exploits = verify_exploits
         self.extra_ignore_dirs = extra_ignore_dirs if extra_ignore_dirs else [] # Store extra ignore dirs
         self.total_embedding_cost = 0.0
         self.total_analysis_cost = 0.0
@@ -84,7 +85,7 @@ class SecurityAnalysisOrchestrator:
         self.total_analysis_output_tokens = 0
         self.cost_calculator = CostCalculator() if self.track_cost else None
         self.logger = logging.getLogger(__name__)
-        self.logger.debug(f"SecurityAnalysisOrchestrator initialized. Cost tracking: {self.track_cost}, Cost Limit: ${max_cost:.2f}")
+        self.logger.debug(f"SecurityAnalysisOrchestrator initialized. Cost tracking: {self.track_cost}, Cost Limit: ${max_cost:.2f}, Verify Exploits: {self.verify_exploits}")
         
     def _verify_findings_via_agent(self, category: str, raw_vulnerabilities: List[Dict]) -> List[Dict]:
         """
@@ -202,15 +203,15 @@ class SecurityAnalysisOrchestrator:
             # Define security categories to analyze
             security_categories = [
                 "authentication",
-                "authorization",
-                "injection",
-                "xss",
-                "data_protection",
-                "api_security",
-                "configuration",
-                "cryptography",
-                "client_side",
-                "business_logic"
+                # "authorization",
+                # "injection",
+                # "xss",
+                # "data_protection",
+                # "api_security",
+                # "configuration",
+                # "cryptography",
+                # "client_side",
+                # "business_logic"
             ]
             self.logger.info(f"Analyzing for categories: {', '.join(security_categories)}")
             
@@ -241,6 +242,7 @@ class SecurityAnalysisOrchestrator:
                     # Create a simple key (consider hashing content for robustness if needed)
                     chunk_key = (chunk.metadata.get('relative_path', ''), chunk.page_content)
                     if chunk_key not in unique_analysis_chunks:
+                        # self.logger.info(f"Adding chunk to unique set: {chunk.metadata.get('relative_path', '')}")
                         unique_analysis_chunks[chunk_key] = chunk
                 # --- End NEW ---
 
@@ -279,9 +281,13 @@ class SecurityAnalysisOrchestrator:
                     category
                 )
                 
-                self.logger.info(f"--- Verifying LLM Findings for category '{category}' via Agent Workflow ---")
-                self.logger.debug(f"Raw vulnerabilities received for category {category}: {vulnerabilities}")
-                verified_vulnerabilities = self._verify_findings_via_agent(category, vulnerabilities)
+                if self.verify_exploits:
+                    self.logger.info(f"--- Verifying LLM Findings for category '{category}' via Agent Workflow ---")
+                    self.logger.debug(f"Raw vulnerabilities received for category {category}: {vulnerabilities}")
+                    verified_vulnerabilities = self._verify_findings_via_agent(category, vulnerabilities)
+                else:
+                    self.logger.info(f"--- Skipping Agent Verification for category '{category}' (verify-exploits disabled) ---")
+                    verified_vulnerabilities = vulnerabilities
                 
                 llm_findings_by_category[category].extend(verified_vulnerabilities)
                 all_vulnerabilities.extend(verified_vulnerabilities)

@@ -6,7 +6,7 @@ set -e
 # --- Configuration ---
 LOCAL_IMAGE_TAG="alder-security-scanner:local" # Tag for locally built images
 ENV_FILE=".env"
-REPORTS_DIR="./local-reports"
+REPORTS_DIR="./security-reports"
 # -------------------
 
 # --- Argument Parsing ---
@@ -31,7 +31,7 @@ REPO_ABS_PATH=$(cd "$REPO_PATH" && pwd)
 # Check if .env file exists
 if [ ! -f "$ENV_FILE" ]; then
     echo "Error: $ENV_FILE file not found."
-    echo "Please create an $ENV_FILE file with your GEMINI_API_KEY and OPENAI_API_KEY."
+    echo "Please create an $ENV_FILE file with your GOOGLE_API_KEY and OPENAI_API_KEY."
     exit 1
 fi
 
@@ -45,8 +45,8 @@ fi
 source "$ENV_FILE"
 
 # Check required environment variables are loaded
-if [ -z "$GEMINI_API_KEY" ] || [ -z "$OPENAI_API_KEY" ]; then
-  echo "Error: One or more required environment variables (GEMINI_API_KEY, OPENAI_API_KEY) are missing from $ENV_FILE."
+if [ -z "$GOOGLE_API_KEY" ] || [ -z "$OPENAI_API_KEY" ]; then
+  echo "Error: One or more required environment variables (GOOGLE_API_KEY, OPENAI_API_KEY) are missing from $ENV_FILE."
   exit 1
 fi
 # ---------------------
@@ -72,9 +72,11 @@ echo "Reports will be saved to: $REPORTS_ABS_PATH"
 echo "Starting Docker container..."
 
 docker run --rm -it \
-  -e GEMINI_API_KEY="$GEMINI_API_KEY" \
+  -e GOOGLE_API_KEY="$GOOGLE_API_KEY" \
   -e OPENAI_API_KEY="$OPENAI_API_KEY" \
   -e INPUT_EXTRA_IGNORE_DIRS="" \
+  -v "$REPO_ABS_PATH:/workspace" \
+  -v "$REPORTS_ABS_PATH:/app/security-reports" \
   "$LOCAL_IMAGE_TAG"
 
 # --- Completion ---

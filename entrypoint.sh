@@ -3,11 +3,11 @@
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
-# Set up command arguments - local path is always the current directory
-CMD_ARGS="--local-path $(pwd)"
+# Set up command arguments - local path is the mounted repository
+CMD_ARGS="--local-path /workspace"
 
-# Set default output directory
-OUTPUT_DIR="./security-reports"
+# Set default output directory  
+OUTPUT_DIR="/app/security-reports"
 CMD_ARGS="$CMD_ARGS --output-dir $OUTPUT_DIR"
 
 # Add extra ignore dirs if INPUT_EXTRA_IGNORE_DIRS is set
@@ -24,7 +24,7 @@ echo "Running security analysis with command: python -m src.main $CMD_ARGS"
 
 # Execute the security analysis from the /app directory (where the source code is located)
 cd /app
-python -m src.main $CMD_ARGS
+python -m src.main --verbose $CMD_ARGS
 
 # Check if the output directory exists
 if [ -d "$OUTPUT_DIR" ]; then

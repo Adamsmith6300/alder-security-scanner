@@ -17,13 +17,14 @@ AST_SPLIT_NODES = {
     'typescript': ['function_declaration', 'class_declaration', 'lexical_declaration', 'expression_statement', 'interface_declaration', 'type_alias_declaration'],
     'tsx': ['function_declaration', 'class_declaration', 'lexical_declaration', 'expression_statement', 'interface_declaration', 'type_alias_declaration'],
     'coffeescript': ['function_definition', 'class_definition', 'method_definition', 'expression_statement'],
+    'java': ['method_declaration', 'class_declaration', 'interface_declaration', 'enum_declaration', 'constructor_declaration'],
 }
 
 # Define a maximum chunk limit per file
 MAX_CHUNKS_PER_FILE = 20
 
 class CodeProcessor:
-    def __init__(self, repo_manager, chunk_size=32000, chunk_overlap=1000):
+    def __init__(self, repo_manager, chunk_size=1000, chunk_overlap=500):
         self.repo_manager = repo_manager
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
@@ -40,7 +41,8 @@ class CodeProcessor:
             'javascript': 'javascript',
             'typescript': 'typescript',
             'tsx': 'tsx',
-            'coffeescript': 'coffeescript'
+            'coffeescript': 'coffeescript',
+            'java': 'java'
         }
         for lang_name, ts_lang_name in languages_to_load.items():
             try:

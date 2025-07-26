@@ -117,7 +117,7 @@ echo "Starting Python application src/main.py using $PYTHON_CMD..."
 # Construct arguments for main.py
 # The script's own arguments ($@) are passed along after $REPO_PATH was shifted out.
 # These can include --verbose, --extra-ignore-dirs, etc.
-PYTHON_ARGS="--verbose --local-path $REPO_ABS_PATH --output-dir $REPORTS_ABS_PATH $@"
+PYTHON_ARGS="--local-path $REPO_ABS_PATH --output-dir $REPORTS_ABS_PATH $@"
 
 echo "Executing command: $PYTHON_CMD -m src.main $PYTHON_ARGS"
 
