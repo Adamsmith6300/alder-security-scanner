@@ -4,11 +4,11 @@
 FROM python:3.11-slim
 
 # Declare build arguments for API keys
-ARG GEMINI_API_KEY
+ARG GOOGLE_API_KEY
 ARG OPENAI_API_KEY
 
 # Set environment variables from build arguments
-ENV GEMINI_API_KEY=$GEMINI_API_KEY
+ENV GOOGLE_API_KEY=$GOOGLE_API_KEY
 ENV OPENAI_API_KEY=$OPENAI_API_KEY
 
 # Install git and other dependencies
@@ -31,5 +31,6 @@ COPY src/ /app/src/
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Define the entrypoint
+# Define the entrypoint and default command
 ENTRYPOINT ["/entrypoint.sh"]
+CMD []

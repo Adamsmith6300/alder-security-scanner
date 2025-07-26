@@ -6,18 +6,21 @@ set -e
 # --- Configuration ---
 LOCAL_IMAGE_TAG="alder-security-scanner:local" # Tag for locally built images
 ENV_FILE=".env"
-REPORTS_DIR="./local-reports"
+REPORTS_DIR="./security-reports"
 # -------------------
 
 # --- Argument Parsing ---
 if [ -z "$1" ]; then
-  echo "Usage: ./local.sh <path_to_repo_to_scan>"
+  echo "Usage: ./local.sh <path_to_repo_to_scan> [additional_arguments...]"
   echo "Example: ./local.sh ../my-test-repo"
+  echo "Example: ./local.sh ../my-test-repo --verbose --verify-exploits --extra-ignore-dirs 'node_modules,dist'"
 
   exit 1
 fi
 
 REPO_PATH="$1"
+shift # Remove the first argument (repo path) so remaining args can be passed through
+ADDITIONAL_ARGS="$@" # Capture all remaining arguments
 
 if [ ! -d "$REPO_PATH" ]; then
   echo "Error: Repository path '$REPO_PATH' not found."
@@ -31,7 +34,7 @@ REPO_ABS_PATH=$(cd "$REPO_PATH" && pwd)
 # Check if .env file exists
 if [ ! -f "$ENV_FILE" ]; then
     echo "Error: $ENV_FILE file not found."
-    echo "Please create an $ENV_FILE file with your GEMINI_API_KEY and OPENAI_API_KEY."
+    echo "Please create an $ENV_FILE file with your GOOGLE_API_KEY and OPENAI_API_KEY."
     exit 1
 fi
 
@@ -45,8 +48,8 @@ fi
 source "$ENV_FILE"
 
 # Check required environment variables are loaded
-if [ -z "$GEMINI_API_KEY" ] || [ -z "$OPENAI_API_KEY" ]; then
-  echo "Error: One or more required environment variables (GEMINI_API_KEY, OPENAI_API_KEY) are missing from $ENV_FILE."
+if [ -z "$GOOGLE_API_KEY" ] || [ -z "$OPENAI_API_KEY" ]; then
+  echo "Error: One or more required environment variables (GOOGLE_API_KEY, OPENAI_API_KEY) are missing from $ENV_FILE."
   exit 1
 fi
 # ---------------------
@@ -66,16 +69,20 @@ REPORTS_ABS_PATH=$(cd "$REPORTS_DIR" && pwd)
 
 echo "Scanning repository: $REPO_ABS_PATH"
 echo "Reports will be saved to: $REPORTS_ABS_PATH"
+if [ -n "$ADDITIONAL_ARGS" ]; then
+  echo "Additional arguments: $ADDITIONAL_ARGS"
+fi
 # -------------
 
 # --- Run Docker Container ---
 echo "Starting Docker container..."
 
 docker run --rm -it \
-  -e GEMINI_API_KEY="$GEMINI_API_KEY" \
+  -e GOOGLE_API_KEY="$GOOGLE_API_KEY" \
   -e OPENAI_API_KEY="$OPENAI_API_KEY" \
-  -e INPUT_EXTRA_IGNORE_DIRS="" \
-  "$LOCAL_IMAGE_TAG"
+  -v "$REPO_ABS_PATH:/workspace" \
+  -v "$REPORTS_ABS_PATH:/app/security-reports" \
+  "$LOCAL_IMAGE_TAG" $ADDITIONAL_ARGS
 
 # --- Completion ---
 echo "---------------------------------------------------"

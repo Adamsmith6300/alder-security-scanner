@@ -5,7 +5,7 @@ from tree_sitter import Language, Parser, Tree, Node
 # Explicitly import the language bindings
 import tree_sitter_python as tspython
 import tree_sitter_javascript as tsjs
-# import tree_sitter_typescript as tsts # For both typescript and tsx
+import tree_sitter_java as tsjava
 
 logger = logging.getLogger(__name__)
 
@@ -18,8 +18,7 @@ class TreeSitterParser:
     LANGUAGE_PROVIDERS = {
         "python": lambda: Language(tspython.language()),
         "javascript": lambda: Language(tsjs.language()),
-        # "typescript": lambda: Language(tsts.language()), # ts and tsx covered by tree_sitter_typescript
-        # "tsx": lambda: Language(tsts.language()),
+        "java": lambda: Language(tsjava.language()),
     }
     # Map for resolving various user inputs to the keys in LANGUAGE_PROVIDERS
     LANGUAGE_NAME_MAP = {
@@ -27,9 +26,7 @@ class TreeSitterParser:
         "py": "python",
         "javascript": "javascript",
         "js": "javascript",
-        # "typescript": "typescript",
-        # "ts": "typescript",
-        # "tsx": "tsx", 
+        "java": "java",
     }
 
     def __init__(self):
@@ -127,6 +124,7 @@ class TreeSitterParser:
             "javascript": ["function_declaration", "function_expression", "arrow_function", "method_definition", "class_declaration"],
             "typescript": ["function_declaration", "function_expression", "arrow_function", "method_definition", "class_declaration", "interface_declaration"],
             "tsx": ["function_declaration", "function_expression", "arrow_function", "method_definition", "class_declaration", "interface_declaration"],
+            "java": ["method_declaration", "constructor_declaration", "class_declaration", "interface_declaration", "enum_declaration"],
         }
         
         # Use canonical name for looking up func_node_types

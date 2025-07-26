@@ -41,6 +41,9 @@ def parse_arguments():
     parser.add_argument("--max-cost", type=float, default=5.0,
                         help="Maximum total cost allowed for LLM API calls in USD (default: 5.0)")
     
+    parser.add_argument("--verify-exploits", action="store_true", default=False,
+                        help="Enable Agent Verification workflow to verify and enrich LLM findings (default: False)")
+    
     return parser.parse_args()
 
 def count_codebase_tokens(local_path, logger, extra_ignore_dirs=None):
@@ -119,9 +122,9 @@ def main():
     create_issues_env = os.getenv("INPUT_CREATE_ISSUES", "false")
     should_create_issues = create_issues_env.lower() == 'true'
 
-    gemini_api_key = os.getenv("GEMINI_API_KEY")
-    if not gemini_api_key or gemini_api_key == "":
-        logger.error("GEMINI_API_KEY environment variable not found.")
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+    if not GOOGLE_API_KEY or GOOGLE_API_KEY == "":
+        logger.error("GOOGLE_API_KEY environment variable not found.")
         return 1
         
     openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -143,10 +146,11 @@ def main():
             logger.info(f"Codebase contains {token_count:,} tokens, which is within the limit of {args.max_tokens:,}. Proceeding with analysis.")
         
         orchestrator = SecurityAnalysisOrchestrator(
-            api_key=gemini_api_key, 
+            api_key=GOOGLE_API_KEY, 
             track_cost=args.verbose,
             extra_ignore_dirs=extra_dirs_to_ignore,
-            max_cost=args.max_cost
+            max_cost=args.max_cost,
+            verify_exploits=args.verify_exploits
         )
         
         options = {
@@ -186,7 +190,7 @@ def main():
                                 github_token=github_token,
                                 repo_slug=github_repository_slug,
                                 logger=logger,
-                                gemini_api_key=gemini_api_key
+                                gemini_api_key=GOOGLE_API_KEY
                             )
                         except Exception as e:
                             logger.error(f"An unexpected error occurred during the GitHub issue creation process: {e}", exc_info=True)

@@ -83,6 +83,17 @@ DEFAULT_IGNORE_DIRS = {
     # Java
     "classes", "META-INF", "WEB-INF",
     
+    # Java Build Tools
+    ".mvn", "mvnw", "mvnw.cmd", ".gradle", "gradle", "gradlew", "gradlew.bat",
+    "build", "target", "out", "bin", "lib", "libs", "dist", "generated-sources",
+    "generated-test-sources", ".settings", ".project", ".classpath", ".factorypath",
+    
+    # Java IDEs
+    ".idea", "*.iml", "*.ipr", "*.iws", ".eclipse", ".metadata", ".recommenders",
+    
+    # Java Application Servers
+    "work", "temp", "logs", "webapps", "deploy", "server", "conf/Catalina",
+    
     # Swift/iOS
     "Pods", "Carthage", "DerivedData", "xcuserdata",
     
@@ -163,6 +174,12 @@ DEFAULT_IGNORE_FILE_PATTERNS = {
     "*.dylib", "*.pyd", "*.jar", "*.war", "*.ear", "*.app", "*.apk", 
     "*.ipa", "*.aab", "*.aar", "*.xap", "*.map", "*.min.js", "*.min.css",
     "*.class",
+    
+    # Java specific files
+    "*.jar", "*.war", "*.ear", "*.class", "*.jad", "*.jmod", "*.jimage",
+    "pom.xml.tag", "pom.xml.releaseBackup", "pom.xml.versionsBackup", "pom.xml.next",
+    "release.properties", "dependency-reduced-pom.xml", ".mvn/timing.properties",
+    ".mvn/wrapper/maven-wrapper.properties", "gradle.properties", "gradlew", "gradlew.bat",
     
     # Package Manager lock files
     "poetry.lock", "Pipfile.lock", "yarn.lock", "package-lock.json", 

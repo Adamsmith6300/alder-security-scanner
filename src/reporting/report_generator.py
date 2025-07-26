@@ -104,7 +104,7 @@ class ReportGenerator:
         total_code_findings: int
         ) -> str:
         """Build the markdown report string directly."""
-        logger.debug("Building Markdown report content...")
+        logger.info("Building Markdown report content...")
         report_lines = []
         
         # --- Header --- 
@@ -113,18 +113,19 @@ class ReportGenerator:
 
         # --- Executive Summary --- 
         report_lines.append("## Executive Summary\n")
-        report_lines.append("This report summarizes potential security findings identified through Large Language Model (LLM) analysis and verified through an AI agent workflow.\n")
         
         # Count verified vs unverified findings
         verified_count = 0
         exploitable_count = 0
         not_exploitable_count = 0
         uncertain_count = 0
+        has_agent_verification = False
         
         for findings_list in grouped_code_findings.values():
             for finding in findings_list:
                 if finding.agent_verification_status == "verified_by_agent_workflow":
                     verified_count += 1
+                    has_agent_verification = True
                     if finding.verified_exploitability_status == "Exploitable":
                         exploitable_count += 1
                     elif finding.verified_exploitability_status == "Not Exploitable":
@@ -132,25 +133,40 @@ class ReportGenerator:
                     elif finding.verified_exploitability_status == "Uncertain":
                         uncertain_count += 1
         
-        report_lines.append("### Verification Summary\n")
-        report_lines.append(f"- **Total Findings**: {total_code_findings}")
-        report_lines.append(f"- **Agent Verified**: {verified_count}")
-        report_lines.append(f"- **Exploitable**: {exploitable_count}")
-        report_lines.append(f"- **Not Exploitable**: {not_exploitable_count}")
-        report_lines.append(f"- **Uncertain**: {uncertain_count}\n")
+        if has_agent_verification:
+            report_lines.append("This report summarizes potential security findings identified through Large Language Model (LLM) analysis and verified through an AI agent workflow.\n")
+            report_lines.append("### Verification Summary\n")
+            report_lines.append(f"- **Total Findings**: {total_code_findings}")
+            report_lines.append(f"- **Agent Verified**: {verified_count}")
+            report_lines.append(f"- **Exploitable**: {exploitable_count}")
+            report_lines.append(f"- **Not Exploitable**: {not_exploitable_count}")
+            report_lines.append(f"- **Uncertain**: {uncertain_count}\n")
+        else:
+            report_lines.append("This report summarizes potential security findings identified through Large Language Model (LLM) analysis.\n")
+            report_lines.append("### Findings Summary\n")
+            report_lines.append(f"- **Total Findings**: {total_code_findings}\n")
         
         report_lines.append("### Findings Summary\n")
-        report_lines.append("| Severity      | Code Findings | Exploitable | Not Exploitable | Uncertain |")
-        report_lines.append("|---------------|---------------|-------------|-----------------|-----------|")
-        
-        for severity in severity_order:
-            findings_in_severity = grouped_code_findings.get(severity, [])
-            total_count = len(findings_in_severity)
-            exploitable = len([f for f in findings_in_severity if f.verified_exploitability_status == "Exploitable"])
-            not_exploitable = len([f for f in findings_in_severity if f.verified_exploitability_status == "Not Exploitable"])
-            uncertain = len([f for f in findings_in_severity if f.verified_exploitability_status == "Uncertain"])
+        if has_agent_verification:
+            report_lines.append("| Severity      | Code Findings | Exploitable | Not Exploitable | Uncertain |")
+            report_lines.append("|---------------|---------------|-------------|-----------------|-----------|")
             
-            report_lines.append(f"| {severity:<13} | {total_count:<13} | {exploitable:<11} | {not_exploitable:<15} | {uncertain:<9} |")
+            for severity in severity_order:
+                findings_in_severity = grouped_code_findings.get(severity, [])
+                total_count = len(findings_in_severity)
+                exploitable = len([f for f in findings_in_severity if f.verified_exploitability_status == "Exploitable"])
+                not_exploitable = len([f for f in findings_in_severity if f.verified_exploitability_status == "Not Exploitable"])
+                uncertain = len([f for f in findings_in_severity if f.verified_exploitability_status == "Uncertain"])
+                
+                report_lines.append(f"| {severity:<13} | {total_count:<13} | {exploitable:<11} | {not_exploitable:<15} | {uncertain:<9} |")
+        else:
+            report_lines.append("| Severity      | Code Findings |")
+            report_lines.append("|---------------|---------------|")
+            
+            for severity in severity_order:
+                findings_in_severity = grouped_code_findings.get(severity, [])
+                total_count = len(findings_in_severity)
+                report_lines.append(f"| {severity:<13} | {total_count:<13} |")
         
         report_lines.append("\n")
 
@@ -283,13 +299,20 @@ class ReportGenerator:
 
         # --- Footer / General Recs --- 
         report_lines.append("## General Recommendations")
-        report_lines.append("- **Prioritize Exploitable Findings**: Focus immediate attention on findings marked as 'Exploitable'")
-        report_lines.append("- **Review Uncertain Findings**: Manually review findings marked as 'Uncertain' for context-specific risks")
-        report_lines.append("- **Implement Defense in Depth**: Even 'Not Exploitable' findings may become exploitable with code changes")
+        if has_agent_verification:
+            report_lines.append("- **Prioritize Exploitable Findings**: Focus immediate attention on findings marked as 'Exploitable'")
+            report_lines.append("- **Review Uncertain Findings**: Manually review findings marked as 'Uncertain' for context-specific risks")
+            report_lines.append("- **Implement Defense in Depth**: Even 'Not Exploitable' findings may become exploitable with code changes")
+        else:
+            report_lines.append("- **Manual Review Required**: All findings require manual review to assess exploitability and business impact")
+            report_lines.append("- **Consider Agent Verification**: Use --verify-exploits flag for AI-powered verification of findings")
         report_lines.append("- **Regular Security Reviews**: Conduct periodic security assessments as code evolves")
         report_lines.append("- **Security Training**: Ensure development team understands secure coding practices")
         report_lines.append("\n---\n")
-        report_lines.append("*This report was generated by Alder AI Security Scanner with agent-based verification.*")
+        if has_agent_verification:
+            report_lines.append("*This report was generated by Alder AI Security Scanner with agent-based verification.*")
+        else:
+            report_lines.append("*This report was generated by Alder AI Security Scanner.*")
 
         return "\n".join(report_lines)
 
@@ -299,7 +322,7 @@ class ReportGenerator:
         raw_llm_findings_by_category: Dict[str, List[Dict]]
     ):
         """Generate a comprehensive security report from raw LLM findings."""
-        logger.debug(f"Generating security report for: {repo_name}")
+        logger.info(f"Generating security report for: {repo_name}")
 
         # Convert and group LLM findings
         grouped_code_findings = self._convert_and_group_llm_findings(raw_llm_findings_by_category)
@@ -307,7 +330,7 @@ class ReportGenerator:
         # Calculate total code findings after conversion and grouping
         total_code_findings = sum(len(lst) for lst in grouped_code_findings.values())
 
-        logger.debug(f"Processing {total_code_findings} LLM code findings.")
+        logger.info(f"Processing {total_code_findings} LLM code findings.")
 
         # Generate report content directly in Python
         report_md = self._build_markdown_report(
