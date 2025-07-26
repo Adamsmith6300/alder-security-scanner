@@ -31,5 +31,6 @@ COPY src/ /app/src/
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Define the entrypoint
+# Define the entrypoint and default command
 ENTRYPOINT ["/entrypoint.sh"]
+CMD []

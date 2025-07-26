@@ -11,13 +11,16 @@ REPORTS_DIR="./security-reports"
 
 # --- Argument Parsing ---
 if [ -z "$1" ]; then
-  echo "Usage: ./local.sh <path_to_repo_to_scan>"
+  echo "Usage: ./local.sh <path_to_repo_to_scan> [additional_arguments...]"
   echo "Example: ./local.sh ../my-test-repo"
+  echo "Example: ./local.sh ../my-test-repo --verbose --verify-exploits --extra-ignore-dirs 'node_modules,dist'"
 
   exit 1
 fi
 
 REPO_PATH="$1"
+shift # Remove the first argument (repo path) so remaining args can be passed through
+ADDITIONAL_ARGS="$@" # Capture all remaining arguments
 
 if [ ! -d "$REPO_PATH" ]; then
   echo "Error: Repository path '$REPO_PATH' not found."
@@ -66,6 +69,9 @@ REPORTS_ABS_PATH=$(cd "$REPORTS_DIR" && pwd)
 
 echo "Scanning repository: $REPO_ABS_PATH"
 echo "Reports will be saved to: $REPORTS_ABS_PATH"
+if [ -n "$ADDITIONAL_ARGS" ]; then
+  echo "Additional arguments: $ADDITIONAL_ARGS"
+fi
 # -------------
 
 # --- Run Docker Container ---
@@ -74,10 +80,9 @@ echo "Starting Docker container..."
 docker run --rm -it \
   -e GOOGLE_API_KEY="$GOOGLE_API_KEY" \
   -e OPENAI_API_KEY="$OPENAI_API_KEY" \
-  -e INPUT_EXTRA_IGNORE_DIRS="" \
   -v "$REPO_ABS_PATH:/workspace" \
   -v "$REPORTS_ABS_PATH:/app/security-reports" \
-  "$LOCAL_IMAGE_TAG"
+  "$LOCAL_IMAGE_TAG" $ADDITIONAL_ARGS
 
 # --- Completion ---
 echo "---------------------------------------------------"
