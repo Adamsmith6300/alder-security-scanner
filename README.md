@@ -36,10 +36,9 @@ The scanner performs analysis across these security domains:
 
 ### Prerequisites
 
-- Python 3.9+ (Python 3.11 recommended)
+- Docker
 - Google Gemini API key
 - OpenAI API key (for embeddings)
-- Docker (optional, for containerized execution)
 
 ### Installation
 
@@ -53,44 +52,16 @@ The scanner performs analysis across these security domains:
    ```bash
    cp .env.example .env
    # Edit .env and add your API keys:
-   # GEMINI_API_KEY=your_gemini_api_key
+   # GOOGLE_API_KEY=your_google_api_key
    # OPENAI_API_KEY=your_openai_api_key
    ```
 
-3. **Choose your installation method:**
-
-#### Option A: Local Installation (Recommended)
-
-```bash
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-#### Option B: Docker Installation
-
-```bash
-# Build the Docker image
-docker build -t alder-security-scanner .
-```
+3. **Build the Docker image:**
+   ```bash
+   docker build -t alder-security-scanner .
+   ```
 
 ## 📖 Usage
-
-### Local Execution (No Docker)
-
-```bash
-# Basic scan
-./local-no-docker.sh /path/to/your/repository
-
-# Verbose output with custom ignore directories
-./local-no-docker.sh /path/to/your/repository --verbose --extra-ignore-dirs "node_modules,dist,build"
-
-# Direct Python execution
-python -m src.main --local-path /path/to/your/repository --output-dir ./reports --verbose
-```
 
 ### Docker Execution
 
@@ -99,21 +70,22 @@ python -m src.main --local-path /path/to/your/repository --output-dir ./reports 
 ./local.sh /path/to/your/repository
 ```
 
-### Command Line Options
+### Docker Script Options
 
-```bash
-python -m src.main [OPTIONS]
+The `local.sh` script builds and runs the scanner in a Docker container with the following features:
 
-Required:
-  --local-path PATH          Path to the repository to analyze
+- **Automatic Docker image building**: The script builds the image locally on each run
+- **Environment variable injection**: Your API keys from `.env` are passed to the container
+- **Volume mounting**: The target repository and reports directory are mounted for analysis
+- **Report generation**: Security reports are saved to `./security-reports/` directory
 
-Optional:
-  --output-dir DIR          Output directory for reports (default: ./reports)
-  --verbose, -v             Enable verbose logging
-  --extra-ignore-dirs DIRS  Comma-separated list of additional directories to ignore
-  --max-tokens NUM          Maximum tokens allowed for analysis (default: 5,000,000)
-  --max-cost FLOAT          Maximum LLM API cost in USD (default: 5.0)
-```
+### Configuration
+
+You can customize the analysis by modifying the Docker script or the scanner's built-in defaults:
+
+- **Maximum tokens**: 5,000,000 tokens per scan (configurable)
+- **Maximum cost**: $5.00 USD per scan (configurable)
+- **Ignore patterns**: Common directories like `node_modules`, `dist`, `build` are automatically ignored
 
 ## 📊 Example Usage Scenarios
 
@@ -121,28 +93,22 @@ Optional:
 
 ```bash
 # Fast scan of a small project
-python -m src.main --local-path ./my-web-app --max-cost 1.0
+./local.sh ./my-web-app
 ```
 
 ### 2. Comprehensive Enterprise Scan
 
 ```bash
-# Full scan with custom exclusions for large codebase
-python -m src.main \
-  --local-path ./enterprise-app \
-  --extra-ignore-dirs "node_modules,vendor,dist,build,docs" \
-  --max-tokens 10000000 \
-  --max-cost 20.0 \
-  --verbose
+# Full scan of a large codebase
+./local.sh ./enterprise-app
 ```
 
-### 3. Focused Analysis
+### 3. Scanning Remote Repositories
 
 ```bash
-# Scan specific parts by using ignore patterns
-python -m src.main \
-  --local-path ./my-app \
-  --extra-ignore-dirs "frontend,mobile,docs,tests"
+# Clone and scan a repository
+git clone https://github.com/user/repo.git
+./local.sh ./repo
 ```
 
 ## ⏱️ Performance & Cost
@@ -151,8 +117,8 @@ python -m src.main \
 - **Cost Estimates**:
   - Small repositories (<500K tokens): Usually under $1
   - Medium repositories (~2M tokens): $1-$4
-  - Large repositories (>5M tokens): $5+ (adjust `--max-cost` accordingly)
-- **Token Limits**: Default maximum of 5M tokens per scan (configurable with `--max-tokens`)
+  - Large repositories (>5M tokens): $5+ (costs are automatically limited to $5.00 by default)
+- **Token Limits**: Default maximum of 5M tokens per scan with automatic cost management
 
 ## 🏗️ Architecture
 
@@ -301,7 +267,7 @@ High-confidence exploitable vulnerability with critical business impact. Immedia
 
 ```bash
 # Required
-GEMINI_API_KEY=your_gemini_api_key
+GOOGLE_API_KEY=your_google_api_key
 OPENAI_API_KEY=your_openai_api_key
 
 # Optional (for GitHub integration)

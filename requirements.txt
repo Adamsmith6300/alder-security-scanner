@@ -3,6 +3,7 @@ python-dotenv==1.0.1
 langchain==0.3.25
 tiktoken==0.7.0
 chromadb==0.4.24
+numpy<2.0.0
 
 # Repository Management
 GitPython==3.1.40

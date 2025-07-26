@@ -203,15 +203,15 @@ class SecurityAnalysisOrchestrator:
             # Define security categories to analyze
             security_categories = [
                 "authentication",
-                # "authorization",
-                # "injection",
-                # "xss",
-                # "data_protection",
-                # "api_security",
-                # "configuration",
-                # "cryptography",
-                # "client_side",
-                # "business_logic"
+                "authorization",
+                "injection",
+                "xss",
+                "data_protection",
+                "api_security",
+                "configuration",
+                "cryptography",
+                "client_side",
+                "business_logic"
             ]
             self.logger.info(f"Analyzing for categories: {', '.join(security_categories)}")
             
